@@ -59,7 +59,7 @@ namespace Microsoft.Azure.Kinect.BodyTracking
 
         [DllImport("k4abt", CallingConvention = k4aCallingConvention)]
         [NativeReference]
-        public static extern k4a_result_t k4abt_tracker_create([In] ref Calibration calibration, k4abt_tracker_configuration_t config, out k4abt_tracker_t tracker_handle);
+        public static extern k4a_result_t k4abt_tracker_create([In] ref Calibration calibration, TrackerConfiguration config, out k4abt_tracker_t tracker_handle);
 
         [DllImport("k4abt", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -73,6 +73,10 @@ namespace Microsoft.Azure.Kinect.BodyTracking
         [NativeReference]
         public static extern k4a_wait_result_t k4abt_tracker_pop_result(IntPtr tracker_handle, out k4abt_frame_t body_frame_handle, int timeout_in_ms);
 
+        [DllImport("k4abt", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern void k4abt_tracker_set_temporal_smoothing(k4abt_tracker_t tracker_handle, float smoothing_factor);
+
 
         [DllImport("k4abt", CallingConvention = k4aCallingConvention)]
         [NativeReference]
@@ -81,25 +85,7 @@ namespace Microsoft.Azure.Kinect.BodyTracking
         [DllImport("k4abt", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern UIntPtr k4abt_frame_get_num_bodies(IntPtr frame_handle);
-        
-        [NativeReference]
-        [StructLayout(LayoutKind.Sequential)]
-        public struct k4abt_tracker_configuration_t
-        {
-            /// <summary>
-            /// The sensor mounting orientation type.
-            /// </summary>
-            /// <remarks>Setting the correct orientation can help the body tracker to achieve more accurate body tracking results</remarks>
-            public k4abt_sensor_orientation_t sensor_orientation;
-            /// <summary>
-            /// Specify whether to use CPU only mode or GPU mode to run the tracker.
-            /// </summary>
-            /// <remarks>
-            /// The CPU only mode doesn't require the machine to have a GPU to run this SDK. But it will be much slower than the GPU mode.
-            /// </remarks>
-            public bool cpu_only_mode;
-        }
-
+       
         public enum k4abt_sensor_orientation_t
         {
             K4ABT_SENSOR_ORIENTATION_DEFAULT = 0,        /**< Mount the sensor at its default orientation */

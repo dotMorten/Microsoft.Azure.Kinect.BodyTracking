@@ -76,7 +76,7 @@ namespace Microsoft.Azure.Kinect.BodyTracking.Examples.WPFViewer
 
             this.DataContext = this;
             var cal = this.kinect.GetCalibration();
-            tracker = new Tracker(cal, true);
+            tracker = new Tracker(cal, new TrackerConfiguration() { CpuOnly = true });
 
             this.InitializeComponent();
         }
