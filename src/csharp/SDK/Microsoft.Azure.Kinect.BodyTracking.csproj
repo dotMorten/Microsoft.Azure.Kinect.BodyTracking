@@ -2,12 +2,23 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>Microsoft.Azure.Kinect.BodyTracking.DotNet</PackageId>
+    <PackageId>Unofficial.Microsoft.Azure.Kinect.BodyTracking.DotNet</PackageId>
+    <Authors>Morten Nielsen</Authors>
+    <Product>Morten Nielsen</Product>
+    <RepositoryUrl>https://github.com/dotMorten/Microsoft.Azure.Kinect.BodyTracking</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/dotMorten/Microsoft.Azure.Kinect.BodyTracking</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>A .NET wrapper for the Azure Kinect BodyTracking SDK</Description>
+    <PackageTags>azure, kinect, body tracking, dotnet</PackageTags>
+    <Copyright>Morten Nielsen</Copyright>
+    <Version>1.0.0-beta1</Version>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Unofficial.Microsoft.Azure.Kinect.Sensor" Version="1.3.0-beta1" />
-    <PackageReference Include="Unofficial.Microsoft.Azure.Kinect.BodyTracking" Version="0.9.4-beta2" />
+    <PackageReference Include="Unofficial.Microsoft.Azure.Kinect.BodyTracking" Version="0.9.4-beta2" ExcludeAssets="contentFiles" />
   </ItemGroup>
 
 </Project>

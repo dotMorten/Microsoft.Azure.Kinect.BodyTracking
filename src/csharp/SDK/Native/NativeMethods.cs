@@ -42,6 +42,7 @@ namespace Microsoft.Azure.Kinect.BodyTracking
                 return true;
             }
         }
+    
 
         [NativeReference]
         public enum k4a_result_t
@@ -77,7 +78,10 @@ namespace Microsoft.Azure.Kinect.BodyTracking
         [NativeReference]
         public static extern void k4abt_tracker_set_temporal_smoothing(k4abt_tracker_t tracker_handle, float smoothing_factor);
 
-
+        [DllImport("k4abt", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern void k4abt_tracker_shutdown(k4abt_tracker_t tracker_handle);
+        
         [DllImport("k4abt", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern void k4abt_frame_release(IntPtr frame_handle);
@@ -85,13 +89,21 @@ namespace Microsoft.Azure.Kinect.BodyTracking
         [DllImport("k4abt", CallingConvention = k4aCallingConvention)]
         [NativeReference]
         public static extern UIntPtr k4abt_frame_get_num_bodies(IntPtr frame_handle);
-       
-        public enum k4abt_sensor_orientation_t
-        {
-            K4ABT_SENSOR_ORIENTATION_DEFAULT = 0,        /**< Mount the sensor at its default orientation */
-            K4ABT_SENSOR_ORIENTATION_CLOCKWISE90,        /**< Clockwisely rotate the sensor 90 degree */
-            K4ABT_SENSOR_ORIENTATION_COUNTERCLOCKWISE90, /**< Counter-clockwisely rotate the sensor 90 degrees */
-            K4ABT_SENSOR_ORIENTATION_FLIP180,            /**< Mount the sensor upside-down */
-        }
+
+        [DllImport("k4abt", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern k4a_result_t k4abt_frame_get_body_skeleton(k4abt_frame_t body_frame_handle, UIntPtr index, out Skeleton skeleton);
+
+        [DllImport("k4abt", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern uint k4abt_frame_get_body_id(k4abt_frame_t body_frame_handle, UIntPtr index);
+
+        [DllImport("k4abt", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern ulong k4abt_frame_get_device_timestamp_usec(k4abt_frame_t body_frame_handle);
+
+        [DllImport("k4abt", CallingConvention = k4aCallingConvention)]
+        [NativeReference]
+        public static extern IntPtr k4abt_frame_get_body_index_map(k4abt_frame_t body_frame_handle);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
@@ -8,8 +7,9 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Azure.Kinect.Sensor;
-using System.Collections.Generic;
 using Microsoft.Azure.Kinect.BodyTracking;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Azure.Kinect.BodyTracking.Examples.WPFViewer
 {
@@ -22,11 +22,13 @@ namespace Microsoft.Azure.Kinect.BodyTracking.Examples.WPFViewer
         /// Azure Kinect sensor
         /// </summary>
         private readonly Device kinect = null;
-
+         
         /// <summary>
         /// Bitmap to display
         /// </summary>
         private readonly WriteableBitmap bitmap = null;
+
+        private readonly WriteableBitmap bodybitmap = null;
 
         /// <summary>
         /// Current status text to display
@@ -56,6 +58,13 @@ namespace Microsoft.Azure.Kinect.BodyTracking.Examples.WPFViewer
         public MainWindow()
         {
             // Open the default device
+            int cnt = Device.GetInstalledCount();
+            if (cnt == 0)
+            {
+                _ = MessageBox.Show("No Azure Kinect camera detected", "Error");
+                Application.Current.Shutdown();
+                return;
+            }
             this.kinect = Device.Open();
 
             // Configure camera modes
@@ -69,17 +78,25 @@ namespace Microsoft.Azure.Kinect.BodyTracking.Examples.WPFViewer
                 SynchronizedImagesOnly = true
             });
 
-            this.colorWidth = this.kinect.GetCalibration().ColorCameraCalibration.ResolutionWidth;
-            this.colorHeight = this.kinect.GetCalibration().ColorCameraCalibration.ResolutionHeight;
-
-            this.bitmap = new WriteableBitmap(colorWidth, colorHeight, 96.0, 96.0, PixelFormats.Bgra32, null);
+            calibration = this.kinect.GetCalibration();
+            this.bitmap = new WriteableBitmap(calibration.ColorCameraCalibration.ResolutionWidth, calibration.ColorCameraCalibration.ResolutionHeight, 96.0, 96.0, PixelFormats.Bgra32, null);
+            List<Color> colorPallete = new List<Color>(256){
+                Colors.Red, Colors.Green, Colors.Blue, Colors.Cyan, Colors.Yellow, Colors.Magenta, Colors.Transparent,
+            };
+            while(colorPallete.Count < 255)
+            {
+                colorPallete.Add(Colors.CornflowerBlue);
+            }
+            colorPallete.Add(Colors.Transparent);
+            this.bodybitmap = new WriteableBitmap(calibration.DepthCameraCalibration.ResolutionWidth, calibration.DepthCameraCalibration.ResolutionHeight, 96.0, 96.0, PixelFormats.Indexed8, new BitmapPalette(colorPallete));
 
             this.DataContext = this;
-            var cal = this.kinect.GetCalibration();
-            tracker = new Tracker(cal, new TrackerConfiguration() { CpuOnly = true });
-
+            tracker = new Tracker(calibration, new TrackerConfiguration() { CpuOnly = false });
+            this.transform = calibration.CreateTransformation();
             this.InitializeComponent();
         }
+        private Calibration calibration;
+        private Transformation transform;
 
         /// <summary>
         /// INotifyPropertyChangedPropertyChanged event to allow window controls to bind to changeable data
@@ -94,6 +111,13 @@ namespace Microsoft.Azure.Kinect.BodyTracking.Examples.WPFViewer
             get
             {
                 return this.bitmap;
+            }
+        }
+        public ImageSource BodyImageSource
+        {
+            get
+            {
+                return this.bodybitmap;
             }
         }
 
@@ -129,54 +153,14 @@ namespace Microsoft.Azure.Kinect.BodyTracking.Examples.WPFViewer
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
             running = false;
-
+            if (this.tracker != null)
+            {
+                this.tracker.Shutdown();
+                this.tracker.Dispose();
+            }
             if (this.kinect != null)
-{
+            {
                 this.kinect.Dispose();
-            }
-        }
-
-    /// <summary>
-        /// Handles the user clicking on the screenshot button
-    /// </summary>
-        /// <param name="sender">object sending the event</param>
-        /// <param name="e">event arguments</param>
-        private void ScreenshotButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Create a render target to which we'll render our composite image
-            RenderTargetBitmap renderBitmap = new RenderTargetBitmap((int)CompositeImage.ActualWidth, (int)CompositeImage.ActualHeight, 96.0, 96.0, PixelFormats.Pbgra32);
-
-            DrawingVisual dv = new DrawingVisual();
-            using (DrawingContext dc = dv.RenderOpen())
-            {
-                VisualBrush brush = new VisualBrush(CompositeImage);
-                dc.DrawRectangle(brush, null, new System.Windows.Rect(new Point(), new Size(CompositeImage.ActualWidth, CompositeImage.ActualHeight)));
-            }
-
-            renderBitmap.Render(dv);
-
-            BitmapEncoder encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
-
-            string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
-
-            string myPhotos = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
-
-            string path = Path.Combine(myPhotos, "KinectScreenshot-" + time + ".png");
-
-            // Write the new file to disk
-            try
-            {
-                using (FileStream fs = new FileStream(path, FileMode.Create))
-                {
-                    encoder.Save(fs);
-                }
-
-                this.StatusText = string.Format(Properties.Resources.SavedScreenshotStatusTextFormat, path);
-            }
-            catch (IOException)
-    {
-                this.StatusText = string.Format(Properties.Resources.FailedScreenshotStatusTextFormat, path);
             }
         }
 
@@ -186,7 +170,6 @@ namespace Microsoft.Azure.Kinect.BodyTracking.Examples.WPFViewer
             {
                 using (Capture capture = await Task.Run(() => { return this.kinect.GetCapture(); }))
                 {
-
                     this.bitmap.Lock();
 
                     var color = capture.Color;
@@ -205,8 +188,34 @@ namespace Microsoft.Azure.Kinect.BodyTracking.Examples.WPFViewer
                     tracker.EnqueueCapture(capture);
                     int bodyCount = 0;
                     using (var frame = await Task.Run(() => tracker.PopResult()))
-        {
+                    {
                         bodyCount = frame.NumberOfBodies;
+                        using (var map = frame.GetBodyIndexMap())
+                        {
+                            this.bodybitmap.Lock();
+                            region = new Int32Rect(0, 0, map.WidthPixels, map.HeightPixels);
+
+                            unsafe
+                            {
+                                using (var pin = map.Memory.Pin())
+                                {
+                                    this.bodybitmap.WritePixels(region, (IntPtr)pin.Pointer, (int)map.Size, map.StrideBytes);
+                                }
+                            }
+                            this.bodybitmap.AddDirtyRect(region);
+                            this.bodybitmap.Unlock();
+                        }
+                        if (bodyCount > 0)
+                        {
+                            var skeleton = frame.GetBodySkeleton(0);
+                            skeletonRenderer.Calibration = calibration;
+                            skeletonRenderer.Skeleton = skeleton;
+                            skeletonRenderer.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            skeletonRenderer.Visibility = Visibility.Collapsed;
+                        }
                     }
                     this.StatusText = "Received Capture: " + capture.Depth.DeviceTimestamp + " Body count: " + bodyCount.ToString();
                 }
