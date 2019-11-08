@@ -81,7 +81,6 @@ namespace Microsoft.Azure.Kinect.BodyTracking
             var map = Activator.CreateInstance(k4a_image_t, true) as Win32.SafeHandles.SafeHandleZeroOrMinusOneIsInvalid;
             var sethandlem = k4a_image_t.GetMethod("SetHandle", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
             sethandlem.Invoke(map, new object[] { ptr });
-            //var map = System.Runtime.InteropServices.Marshal.PtrToStructure(ptr, k4a_image_t);
             return (Sensor.Image)constructor.Invoke(new object[] { map });
         }
         /// <summary>
