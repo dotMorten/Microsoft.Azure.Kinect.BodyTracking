@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Kinect.Body
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Azure.Kinect.BodyTracking.Examples.WPFViewer", "Examples\WPF\Microsoft.Azure.Kinect.BodyTracking.Examples.WPFViewer.csproj", "{9E4B11D6-76B1-42B0-800A-B2499B3073B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PeopleAlerter", "Examples\PeopleAlerter\PeopleAlerter.csproj", "{0BC00E15-D38E-42CB-AD02-A6ABBEEF3CD7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{9E4B11D6-76B1-42B0-800A-B2499B3073B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E4B11D6-76B1-42B0-800A-B2499B3073B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E4B11D6-76B1-42B0-800A-B2499B3073B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BC00E15-D38E-42CB-AD02-A6ABBEEF3CD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BC00E15-D38E-42CB-AD02-A6ABBEEF3CD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BC00E15-D38E-42CB-AD02-A6ABBEEF3CD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BC00E15-D38E-42CB-AD02-A6ABBEEF3CD7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -40,7 +40,7 @@ namespace Microsoft.Azure.Kinect.BodyTracking
         /// Get the number of people from the
         /// </summary>
         /// <value>Gets the number of detected bodies. 0 if the function fails.</value>
-        public int NumberOfBodies => (int)NativeMethods.k4abt_frame_get_num_bodies(this.handle.DangerousGetHandle());
+        public uint NumberOfBodies => (uint)NativeMethods.k4abt_frame_get_num_bodies(this.handle.DangerousGetHandle());
 
         /// <summary>
         /// Get the joint information for a particular person index from the frame

@@ -186,7 +186,7 @@ namespace Microsoft.Azure.Kinect.BodyTracking.Examples.WPFViewer
                     this.bitmap.AddDirtyRect(region);
                     this.bitmap.Unlock();
                     tracker.EnqueueCapture(capture);
-                    int bodyCount = 0;
+                    uint bodyCount = 0;
                     using (var frame = await Task.Run(() => tracker.PopResult()))
                     {
                         bodyCount = frame.NumberOfBodies;
